@@ -16,7 +16,7 @@ public class ServiceDetectorDeFraude {
 		kafkaConsumer.subscribe(Collections.singletonList("ECOMMERCE_NEW_ORDER"));
 		
 		while(true) {	
-			ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(100));
+			ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(100)); //onde acontece o commit, da mensagem recebida
 			
 			if(!records.isEmpty()) {
 				System.out.println("Encontrei registros. Quantidade = " + records.count());
@@ -41,6 +41,7 @@ public class ServiceDetectorDeFraude {
 		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 		properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, ServiceDetectorDeFraude.class.getName());
 		//properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, "ID_DO_CONSUMIDOR");
+		properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1"); //Consumindo uma mensagem por vez, para não sofrer com o problema de rebalanceamento do Kafka.
 		return properties;
 	}
 }
