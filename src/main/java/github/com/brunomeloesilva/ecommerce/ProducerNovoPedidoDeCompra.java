@@ -1,6 +1,7 @@
 package github.com.brunomeloesilva.ecommerce;
 
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.kafka.clients.producer.Callback;
@@ -13,9 +14,9 @@ public class ProducerNovoPedidoDeCompra {
 
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
 		
-		var kafkaProducer = new KafkaProducer<String, String>(properties());
-		String key = "IdPedido01,IdUsuario01,ValorCompra120.00";
-		String value = key;
+		var kafkaProducer = new KafkaProducer<String, String>(properties()); 
+		String key = UUID.randomUUID().toString(); //Para que sempre caia em partições diferentes (Antes devo definir mais de uma partição as configurações das minhas TAGs no Kafka).
+		String value = "IdPedido01,IdUsuario01,ValorCompra120.00";;
 		var producerRecord = new ProducerRecord<String, String>("ECOMMERCE_NEW_ORDER", key, value);
 		//kafkaProducer.send(producerRecord); //Modo Assincrono
 		//kafkaProducer.send(producerRecord).get(); //Modo Sincrono
@@ -30,8 +31,8 @@ public class ProducerNovoPedidoDeCompra {
 		
 		kafkaProducer.send(producerRecord, callback).get(); 
 		//Enviando outro registro...
-		String keyEmail = "Obrigado por seu pedido. Obrigado por seu pedido.";
-		String valueEmail = keyEmail;
+		String keyEmail = UUID.randomUUID().toString(); //Para que sempre caia em partições diferentes (Antes devo definir mais de uma partição as configurações das minhas TAGs no Kafka).
+		String valueEmail = "Obrigado por seu pedido. Obrigado por seu pedido.";;
 		var producerEmailRecord = new ProducerRecord<String, String>("ECOMMERCE_SEND_EMAIL", keyEmail, valueEmail);
 		kafkaProducer.send(producerEmailRecord, callback).get(); 
 	}

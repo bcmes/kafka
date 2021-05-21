@@ -40,6 +40,7 @@ public class ServiceDetectorDeFraude {
 		properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 		properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, ServiceDetectorDeFraude.class.getName());
+		//properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, "ID_DO_CONSUMIDOR");
 		return properties;
 	}
 }
