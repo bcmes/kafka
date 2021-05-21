@@ -3,12 +3,13 @@ package github.com.brunomeloesilva.ecommerce;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
-public class NovoPedidoDeCompraMain {
+public class ProducerNovoPedidoDeCompra {
 
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
 		
@@ -19,13 +20,20 @@ public class NovoPedidoDeCompraMain {
 		//kafkaProducer.send(producerRecord); //Modo Assincrono
 		//kafkaProducer.send(producerRecord).get(); //Modo Sincrono
 		//Modo Sincrono, analisando o retorno do envio.
-		kafkaProducer.send(producerRecord, (data, exception) -> {
+		Callback callback = (data, exception) -> {
 			if(exception != null) {
 				exception.printStackTrace();
 				return;
 			}
 			System.out.println("Sucesso enviado tópico: " + data.topic() +":::partition "+ data.partition() + "/offset " + data.offset() +"/timestamp "+ data.timestamp());
-		}).get(); 
+		};
+		
+		kafkaProducer.send(producerRecord, callback).get(); 
+		//Enviando outro registro...
+		String keyEmail = "Obrigado por seu pedido. Obrigado por seu pedido.";
+		String valueEmail = key;
+		var producerEmailRecord = new ProducerRecord<String, String>("ECOMMERCE_SEND_EMAIL", keyEmail, valueEmail);
+		kafkaProducer.send(producerEmailRecord, callback).get(); 
 	}
 
 	
