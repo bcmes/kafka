@@ -31,7 +31,7 @@ public class ProducerNovoPedidoDeCompra {
 		kafkaProducer.send(producerRecord, callback).get(); 
 		//Enviando outro registro...
 		String keyEmail = "Obrigado por seu pedido. Obrigado por seu pedido.";
-		String valueEmail = key;
+		String valueEmail = keyEmail;
 		var producerEmailRecord = new ProducerRecord<String, String>("ECOMMERCE_SEND_EMAIL", keyEmail, valueEmail);
 		kafkaProducer.send(producerEmailRecord, callback).get(); 
 	}
