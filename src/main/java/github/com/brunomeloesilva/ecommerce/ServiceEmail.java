@@ -1,5 +1,7 @@
 package github.com.brunomeloesilva.ecommerce;
 
+import java.util.HashMap;
+
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 public class ServiceEmail {
@@ -7,16 +9,18 @@ public class ServiceEmail {
 		
 		var service = new ServiceEmail();
 		
-		try(var serviceKafka = new ConsumidorKafka(ServiceEmail.class.getName()
+		try(var serviceKafka = new ConsumidorKafka<Email>(ServiceEmail.class.getName()
 											, "ECOMMERCE_SEND_EMAIL"
-											, service::parse))
+											, service::parse
+											, Email.class
+											, new HashMap<>()))
 		{
 			serviceKafka.run();
 		}
 		
 	}
 	
-	private void parse(ConsumerRecord<String, String> record) {
+	private void parse(ConsumerRecord<String, Email> record) {
 		System.out.println("\n--------------------- INICIO DO PROCESSAMENTO DA MENSAGEM ---------------------");
 		var mensagem =  String.format("Enviando Email: Key = %s, Value = %s, Partition = %s, Offset = %s"
 								, record.key(), record.value(), record.partition(), record.offset());

@@ -10,9 +10,9 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
-public class ProdutorKafka implements Closeable{
+public class ProdutorKafka<T> implements Closeable{
 	
-	private final KafkaProducer<String, String> producer;
+	private final KafkaProducer<String, T> producer;
 	
 	public ProdutorKafka() {
 		this.producer = new KafkaProducer<>(properties());
@@ -22,12 +22,12 @@ public class ProdutorKafka implements Closeable{
 		Properties properties = new Properties();
 		properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
 		properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-		properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+		properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, GsonSerializer.class.getName());
 		return properties;
 	}
 
-	public void send(String topic, String key, String value) throws InterruptedException, ExecutionException {
-		var producerRecord = new ProducerRecord<String, String>(topic, key, value);
+	public void send(String topic, String key, T value) throws InterruptedException, ExecutionException {
+		var producerRecord = new ProducerRecord<String, T>(topic, key, value);
 
 		Callback callback = (data, exception) -> {
 			if(exception != null) {

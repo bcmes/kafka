@@ -3,8 +3,10 @@ package github.com.brunomeloesilva.ecommerce;
 import java.io.Closeable;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -12,40 +14,50 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
-public class ConsumidorKafka implements Closeable{
+public class ConsumidorKafka<T> implements Closeable{
 
-	private final KafkaConsumer<String, String> kafkaConsumer;
-	private final ConsumerFunction parse;
+	private final KafkaConsumer<String, T> kafkaConsumer;
+	private final ConsumerFunction<T> parse;
 
-	public ConsumidorKafka(String groupId, String topic, ConsumerFunction parse) {
-		this.parse = parse;
-		this.kafkaConsumer = new KafkaConsumer<>(properties(groupId));
-		
+	public ConsumidorKafka(String groupId, String topic, ConsumerFunction<T> parse, Class<T> type, Map<String, String> properties) {
+		this(groupId, parse, type, properties);
 		kafkaConsumer.subscribe(Collections.singletonList(topic));
+	}
+
+	public ConsumidorKafka(String groupId, Pattern topic, ConsumerFunction<T> parse, Class<T> type, Map<String, String> properties) {
+		this(groupId, parse, type, properties);
+		kafkaConsumer.subscribe(topic);
+	}
+
+	private ConsumidorKafka(String groupId, ConsumerFunction<T> parse, Class<T> type, Map<String, String> properties) {
+		this.parse = parse;
+		this.kafkaConsumer = new KafkaConsumer<>(getProperties(type, groupId, properties));
 	}
 
 	public void run() {
 		while(true) {	
-			ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(100));
+			ConsumerRecords<String, T> records = kafkaConsumer.poll(Duration.ofMillis(100));
 			
 			if(!records.isEmpty()) {
 				System.out.println("Encontrei registros. Quantidade = " + records.count());
 
-				for (ConsumerRecord<String, String> record : records) {
+				for (ConsumerRecord<String, T> record : records) {
 					parse.consume(record);
 				}
 			}
 		}
 	}
 
-	private static Properties properties(String groupId) {
+	private Properties getProperties(Class<T> type, String groupId, Map<String, String> overrideProperties) {
 		Properties properties = new Properties();
 		properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
 		properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GsonDeserializer.class.getName());
 		properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
 		properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, "ID_DO_CONSUMIDOR_" + UUID.randomUUID().toString());
 		properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1");
+		properties.setProperty(GsonDeserializer.TYPE_CONFIG, type.getName());
+		properties.putAll(overrideProperties);
 		return properties;
 	}
 
