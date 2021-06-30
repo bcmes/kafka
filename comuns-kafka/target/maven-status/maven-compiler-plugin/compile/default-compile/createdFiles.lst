@@ -1,0 +1,5 @@
+github\com\brunomeloesilva\ecommerce\GsonDeserializer.class
+github\com\brunomeloesilva\ecommerce\GsonSerializer.class
+github\com\brunomeloesilva\ecommerce\ConsumerFunction.class
+github\com\brunomeloesilva\ecommerce\ProdutorKafka.class
+github\com\brunomeloesilva\ecommerce\ConsumidorKafka.class
